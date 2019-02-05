@@ -14,7 +14,6 @@ import java.util.Random;
 import java.util.TreeMap;
 
 /**
- *
  * @author TOWSIF AHMED
  */
 public class RecommenderSystem {
@@ -92,7 +91,7 @@ public class RecommenderSystem {
 
             userCluster.get(uid).add(mid);
             // itemCluster.get(mid).add(uid);
-            userSum[mid] += r;
+            userSum[uid] += r;
         }
         /*Calculate the average of all user*/
         int sz = 0;
@@ -1118,10 +1117,6 @@ public class RecommenderSystem {
     }
 
 
-
-
-
-
     /// ============================================================ //
     // DBSCAN Clustering
     // ============================================================ //
@@ -1572,21 +1567,92 @@ public class RecommenderSystem {
         //     }
         // }
 
-        //////////////
-        arrayListofClusters = arrayListofTempClusters;
+        //        //////////////
+        //        arrayListofClusters = arrayListofTempClusters;
+        //
+        //        // Filling the MATRIX after Divisive
+        //        fillMatrix();
+        //        //        for (int p = 0; p < arrayListofTempClusters.size(); p++) {
+        //        //            for (int q = 0; q < arrayListofTempClusters.get(p).size(); q++) {
+        //        //                int m = arrayListofTempClusters.get(p).get(q);
+        //        //                for (int r = 0; r < arrayListofTempClusters.get(p).size(); r++) {
+        //        //                    int n = arrayListofTempClusters.get(p).get(r);
+        //        //                    matrix[m][n] += 1;
+        //        //                }
+        //        //            }
+        //        //        }
+        //        displayMatrix();
+        // The MATRIX to fill after every clustering
+        File file = new File("F:/ThesisWorks/Datasets/90_10/userMatrix.csv");
+        boolean exists = file.exists();
+        if (!exists) {
+            System.out.println("[userMatrix.csv] File Does Not Exist!");
 
-        // Filling the MATRIX after Divisive
-        fillMatrix();
-        //        for (int p = 0; p < arrayListofTempClusters.size(); p++) {
-        //            for (int q = 0; q < arrayListofTempClusters.get(p).size(); q++) {
-        //                int m = arrayListofTempClusters.get(p).get(q);
-        //                for (int r = 0; r < arrayListofTempClusters.get(p).size(); r++) {
-        //                    int n = arrayListofTempClusters.get(p).get(r);
-        //                    matrix[m][n] += 1;
-        //                }
-        //            }
-        //        }
-        displayMatrix();
+            // writing userMatrix.csv
+            PrintWriter out1 = new PrintWriter(new FileWriter(outputPathPrefix + "userMatrix.csv"));
+            for (int p = 0; p < arrayListofTempClusters.size(); p++) {
+                for (int q = 0; q < arrayListofTempClusters.get(p).size(); q++) {
+                    int m = arrayListofTempClusters.get(p).get(q);
+                    for (int r = 0; r < arrayListofTempClusters.get(p).size(); r++) {
+                        int n = arrayListofTempClusters.get(p).get(r);
+                        matrix[m][n] += 1;
+
+                        // save in file
+                        out1.println(m + "," + n + "," + matrix[m][n]);
+                        out1.flush();
+                    }
+                }
+            }
+            out1.close();
+        } else {
+            System.out.println("[userMatrix.csv] File Exist!");
+
+            // reading userMatrix.csv
+            BufferedReader in = new BufferedReader(new FileReader(inputPathPrefix + "userMatrix.csv"));
+            String text;
+            String[] cut;
+            int i = 0, j = 0;
+            while ((text = in .readLine()) != null) {
+                cut = text.split(",");
+                i = Integer.parseInt(cut[0]);
+                j = Integer.parseInt(cut[1]);
+                matrix[i][j] = Double.parseDouble(cut[2]);
+                System.out.println("Reading...");
+                System.out.println("matrix[" + i + "][" + j + "] = " + matrix[i][j]);
+            }
+
+            // updating userMatrix.csv
+            PrintWriter out2 = new PrintWriter(new FileWriter(outputPathPrefix + "userMatrix.csv"));
+            for (int p = 0; p < arrayListofTempClusters.size(); p++) {
+                for (int q = 0; q < arrayListofTempClusters.get(p).size(); q++) {
+                    int m = arrayListofTempClusters.get(p).get(q);
+                    for (int r = 0; r < arrayListofTempClusters.get(p).size(); r++) {
+                        int n = arrayListofTempClusters.get(p).get(r);
+                        matrix[m][n] += 1;
+
+                        // save update in file
+                        out2.println(m + "," + n + "," + matrix[m][n]);
+                        out2.flush();
+
+                        System.out.println();
+                        System.out.println("After updating:");
+                        System.out.println("matrix[" + m + "][" + n + "] = " + matrix[m][n]);
+                    }
+                }
+            }
+            out2.close();
+        }
+
+        System.out.println();
+        System.out.println("display matrix...");
+        for (int i = 1; i < mxuid; i++) {
+            for (int j = 1; j < mxuid; j++) {
+                if (matrix[i][j] > 0) {
+                    System.out.println("matrix[" + i + "][" + j + "] = " + matrix[i][j]);
+                }
+            }
+        }
+
     }
 
 
@@ -1613,7 +1679,7 @@ public class RecommenderSystem {
         }
 
         int numOfClusters = 10000;
-        while (numOfClusters > 61) { // to get 61 clusters
+        while (numOfClusters > 6000) { // to get 61 clusters
             double minDistance = 10000;
             double distance = 0;
             int x = 0;
@@ -1691,21 +1757,91 @@ public class RecommenderSystem {
         //        System.out.println("\n total clusters: " + totalClusters);
 
 
-        /////////////
-        arrayListofClusters = arrayListofTempClusters;
+        //        /////////////
+        //        arrayListofClusters = arrayListofTempClusters;
+        //
+        //        // Filling the MATRIX after Single-Linkage
+        //        fillMatrix();
+        //        //        for (int p = 0; p < arrayListofTempClusters.size(); p++) {
+        //        //            for (int q = 0; q < arrayListofTempClusters.get(p).size(); q++) {
+        //        //                int m = arrayListofTempClusters.get(p).get(q);
+        //        //                for (int r = 0; r < arrayListofTempClusters.get(p).size(); r++) {
+        //        //                    int n = arrayListofTempClusters.get(p).get(r);
+        //        //                    matrix[m][n] += 1;
+        //        //                }
+        //        //            }
+        //        //        }
+        //        displayMatrix();
+        // The MATRIX to fill after every clustering
+        File file = new File("F:/ThesisWorks/Datasets/90_10/userMatrix.csv");
+        boolean exists = file.exists();
+        if (!exists) {
+            System.out.println("[userMatrix.csv] File Does Not Exist!");
 
-        // Filling the MATRIX after Single-Linkage
-        fillMatrix();
-        //        for (int p = 0; p < arrayListofTempClusters.size(); p++) {
-        //            for (int q = 0; q < arrayListofTempClusters.get(p).size(); q++) {
-        //                int m = arrayListofTempClusters.get(p).get(q);
-        //                for (int r = 0; r < arrayListofTempClusters.get(p).size(); r++) {
-        //                    int n = arrayListofTempClusters.get(p).get(r);
-        //                    matrix[m][n] += 1;
-        //                }
-        //            }
-        //        }
-        displayMatrix();
+            // writing userMatrix.csv
+            PrintWriter out1 = new PrintWriter(new FileWriter(outputPathPrefix + "userMatrix.csv"));
+            for (int p = 0; p < arrayListofTempClusters.size(); p++) {
+                for (int q = 0; q < arrayListofTempClusters.get(p).size(); q++) {
+                    int m = arrayListofTempClusters.get(p).get(q);
+                    for (int r = 0; r < arrayListofTempClusters.get(p).size(); r++) {
+                        int n = arrayListofTempClusters.get(p).get(r);
+                        matrix[m][n] += 1;
+
+                        // save in file
+                        out1.println(m + "," + n + "," + matrix[m][n]);
+                        out1.flush();
+                    }
+                }
+            }
+            out1.close();
+        } else {
+            System.out.println("[userMatrix.csv] File Exist!");
+
+            // reading userMatrix.csv
+            BufferedReader in = new BufferedReader(new FileReader(inputPathPrefix + "userMatrix.csv"));
+            String text;
+            String[] cut;
+            int i = 0, j = 0;
+            while ((text = in .readLine()) != null) {
+                cut = text.split(",");
+                i = Integer.parseInt(cut[0]);
+                j = Integer.parseInt(cut[1]);
+                matrix[i][j] = Double.parseDouble(cut[2]);
+                System.out.println("Reading...");
+                System.out.println("matrix[" + i + "][" + j + "] = " + matrix[i][j]);
+            }
+
+            // updating userMatrix.csv
+            PrintWriter out2 = new PrintWriter(new FileWriter(outputPathPrefix + "userMatrix.csv"));
+            for (int p = 0; p < arrayListofTempClusters.size(); p++) {
+                for (int q = 0; q < arrayListofTempClusters.get(p).size(); q++) {
+                    int m = arrayListofTempClusters.get(p).get(q);
+                    for (int r = 0; r < arrayListofTempClusters.get(p).size(); r++) {
+                        int n = arrayListofTempClusters.get(p).get(r);
+                        matrix[m][n] += 1;
+
+                        // save update in file
+                        out2.println(m + "," + n + "," + matrix[m][n]);
+                        out2.flush();
+
+                        System.out.println();
+                        System.out.println("After updating:");
+                        System.out.println("matrix[" + m + "][" + n + "] = " + matrix[m][n]);
+                    }
+                }
+            }
+            out2.close();
+        }
+
+        System.out.println();
+        System.out.println("display matrix...");
+        for (int i = 1; i < mxuid; i++) {
+            for (int j = 1; j < mxuid; j++) {
+                if (matrix[i][j] > 0) {
+                    System.out.println("matrix[" + i + "][" + j + "] = " + matrix[i][j]);
+                }
+            }
+        }
     }
 
 
@@ -1808,27 +1944,97 @@ public class RecommenderSystem {
         //     }
         // }
 
-        arrayListofClusters = arrayListofTempClusters;
+        //        arrayListofClusters = arrayListofTempClusters;
+        //
+        //        // // Display clusters
+        //        // System.out.println("Final Clusters after Complete-Linkage:");
+        //        // int totalClusters = 0;
+        //        // for (int i = 0; i < arrayListofClusters.size(); i++) {
+        //        //     if (arrayListofClusters.get(i).size() > 0) {
+        //        //         for (int j = 0; j < arrayListofClusters.get(i).size(); j++) {
+        //        //             System.out.print(arrayListofClusters.get(i).get(j) + ", ");
+        //        //         }
+        //        //         System.out.println("\n total objects: " + arrayListofClusters.get(i).size()); // displays total objects
+        //        //         System.out.println();
+        //        //         System.out.println("================================");
+        //        //         totalClusters++;
+        //        //     }
+        //        // }
+        //        // System.out.println("\n total clusters: " + totalClusters);
+        //
+        //        // Filling the MATRIX after Complete-Linkage
+        //        fillMatrix();
+        //        displayMatrix();
+        // The MATRIX to fill after every clustering
+        File file = new File("F:/ThesisWorks/Datasets/90_10/userMatrix.csv");
+        boolean exists = file.exists();
+        if (!exists) {
+            System.out.println("[userMatrix.csv] File Does Not Exist!");
 
-        // // Display clusters
-        // System.out.println("Final Clusters after Complete-Linkage:");
-        // int totalClusters = 0;
-        // for (int i = 0; i < arrayListofClusters.size(); i++) {
-        //     if (arrayListofClusters.get(i).size() > 0) {
-        //         for (int j = 0; j < arrayListofClusters.get(i).size(); j++) {
-        //             System.out.print(arrayListofClusters.get(i).get(j) + ", ");
-        //         }
-        //         System.out.println("\n total objects: " + arrayListofClusters.get(i).size()); // displays total objects
-        //         System.out.println();
-        //         System.out.println("================================");
-        //         totalClusters++;
-        //     }
-        // }
-        // System.out.println("\n total clusters: " + totalClusters);
+            // writing userMatrix.csv
+            PrintWriter out1 = new PrintWriter(new FileWriter(outputPathPrefix + "userMatrix.csv"));
+            for (int p = 0; p < arrayListofTempClusters.size(); p++) {
+                for (int q = 0; q < arrayListofTempClusters.get(p).size(); q++) {
+                    int m = arrayListofTempClusters.get(p).get(q);
+                    for (int r = 0; r < arrayListofTempClusters.get(p).size(); r++) {
+                        int n = arrayListofTempClusters.get(p).get(r);
+                        matrix[m][n] += 1;
 
-        // Filling the MATRIX after Complete-Linkage
-        fillMatrix();
-        displayMatrix();
+                        // save in file
+                        out1.println(m + "," + n + "," + matrix[m][n]);
+                        out1.flush();
+                    }
+                }
+            }
+            out1.close();
+        } else {
+            System.out.println("[userMatrix.csv] File Exist!");
+
+            // reading userMatrix.csv
+            BufferedReader in = new BufferedReader(new FileReader(inputPathPrefix + "userMatrix.csv"));
+            String text;
+            String[] cut;
+            int i = 0, j = 0;
+            while ((text = in .readLine()) != null) {
+                cut = text.split(",");
+                i = Integer.parseInt(cut[0]);
+                j = Integer.parseInt(cut[1]);
+                matrix[i][j] = Double.parseDouble(cut[2]);
+                System.out.println("Reading...");
+                System.out.println("matrix[" + i + "][" + j + "] = " + matrix[i][j]);
+            }
+
+            // updating userMatrix.csv
+            PrintWriter out2 = new PrintWriter(new FileWriter(outputPathPrefix + "userMatrix.csv"));
+            for (int p = 0; p < arrayListofTempClusters.size(); p++) {
+                for (int q = 0; q < arrayListofTempClusters.get(p).size(); q++) {
+                    int m = arrayListofTempClusters.get(p).get(q);
+                    for (int r = 0; r < arrayListofTempClusters.get(p).size(); r++) {
+                        int n = arrayListofTempClusters.get(p).get(r);
+                        matrix[m][n] += 1;
+
+                        // save update in file
+                        out2.println(m + "," + n + "," + matrix[m][n]);
+                        out2.flush();
+
+                        System.out.println();
+                        System.out.println("After updating:");
+                        System.out.println("matrix[" + m + "][" + n + "] = " + matrix[m][n]);
+                    }
+                }
+            }
+            out2.close();
+        }
+
+        System.out.println();
+        System.out.println("display matrix...");
+        for (int i = 1; i < mxuid; i++) {
+            for (int j = 1; j < mxuid; j++) {
+                if (matrix[i][j] > 0) {
+                    System.out.println("matrix[" + i + "][" + j + "] = " + matrix[i][j]);
+                }
+            }
+        }
     }
 
 
@@ -1933,26 +2139,97 @@ public class RecommenderSystem {
         //     }
         // }
 
-        arrayListofClusters = arrayListofTempClusters;
+        //        arrayListofClusters = arrayListofTempClusters;
+        //
+        //        // Display clusters
+        //        System.out.println("Final Clusters after Average-Linkage:");
+        //        int totalClusters = 0;
+        //        for (int i = 0; i < arrayListofClusters.size(); i++) {
+        //            if (arrayListofClusters.get(i).size() > 0) {
+        //                for (int j = 0; j < arrayListofClusters.get(i).size(); j++) {
+        //                    System.out.print(arrayListofClusters.get(i).get(j) + ", ");
+        //                }
+        //                System.out.println("\n total objects: " + arrayListofClusters.get(i).size()); // displays total objects
+        //                System.out.println();
+        //                System.out.println("================================");
+        //                totalClusters++;
+        //            }
+        //        }
+        //        System.out.println("\n total clusters: " + totalClusters);
+        //
+        //        // Filling the MATRIX after Average-Linkage
+        //        fillMatrix();
+        //        displayMatrix();
 
-        // Display clusters
-        System.out.println("Final Clusters after Average-Linkage:");
-        int totalClusters = 0;
-        for (int i = 0; i < arrayListofClusters.size(); i++) {
-            if (arrayListofClusters.get(i).size() > 0) {
-                for (int j = 0; j < arrayListofClusters.get(i).size(); j++) {
-                    System.out.print(arrayListofClusters.get(i).get(j) + ", ");
+        // The MATRIX to fill after every clustering
+        File file = new File("F:/ThesisWorks/Datasets/90_10/userMatrix.csv");
+        boolean exists = file.exists();
+        if (!exists) {
+            System.out.println("[userMatrix.csv] File Does Not Exist!");
+
+            // writing userMatrix.csv
+            PrintWriter out1 = new PrintWriter(new FileWriter(outputPathPrefix + "userMatrix.csv"));
+            for (int p = 0; p < arrayListofTempClusters.size(); p++) {
+                for (int q = 0; q < arrayListofTempClusters.get(p).size(); q++) {
+                    int m = arrayListofTempClusters.get(p).get(q);
+                    for (int r = 0; r < arrayListofTempClusters.get(p).size(); r++) {
+                        int n = arrayListofTempClusters.get(p).get(r);
+                        matrix[m][n] += 1;
+
+                        // save in file
+                        out1.println(m + "," + n + "," + matrix[m][n]);
+                        out1.flush();
+                    }
                 }
-                System.out.println("\n total objects: " + arrayListofClusters.get(i).size()); // displays total objects
-                System.out.println();
-                System.out.println("================================");
-                totalClusters++;
+            }
+            out1.close();
+        } else {
+            System.out.println("[userMatrix.csv] File Exist!");
+
+            // reading userMatrix.csv
+            BufferedReader in = new BufferedReader(new FileReader(inputPathPrefix + "userMatrix.csv"));
+            String text;
+            String[] cut;
+            int i = 0, j = 0;
+            while ((text = in .readLine()) != null) {
+                cut = text.split(",");
+                i = Integer.parseInt(cut[0]);
+                j = Integer.parseInt(cut[1]);
+                matrix[i][j] = Double.parseDouble(cut[2]);
+                System.out.println("Reading...");
+                System.out.println("matrix[" + i + "][" + j + "] = " + matrix[i][j]);
+            }
+
+            // updating userMatrix.csv
+            PrintWriter out2 = new PrintWriter(new FileWriter(outputPathPrefix + "userMatrix.csv"));
+            for (int p = 0; p < arrayListofTempClusters.size(); p++) {
+                for (int q = 0; q < arrayListofTempClusters.get(p).size(); q++) {
+                    int m = arrayListofTempClusters.get(p).get(q);
+                    for (int r = 0; r < arrayListofTempClusters.get(p).size(); r++) {
+                        int n = arrayListofTempClusters.get(p).get(r);
+                        matrix[m][n] += 1;
+
+                        // save update in file
+                        out2.println(m + "," + n + "," + matrix[m][n]);
+                        out2.flush();
+
+                        System.out.println();
+                        System.out.println("After updating:");
+                        System.out.println("matrix[" + m + "][" + n + "] = " + matrix[m][n]);
+                    }
+                }
+            }
+            out2.close();
+        }
+
+        System.out.println();
+        System.out.println("display matrix...");
+        for (int i = 1; i < mxuid; i++) {
+            for (int j = 1; j < mxuid; j++) {
+                if (matrix[i][j] > 0) {
+                    System.out.println("matrix[" + i + "][" + j + "] = " + matrix[i][j]);
+                }
             }
         }
-        System.out.println("\n total clusters: " + totalClusters);
-
-        // Filling the MATRIX after Average-Linkage
-        fillMatrix();
-        displayMatrix();
     }
 }
